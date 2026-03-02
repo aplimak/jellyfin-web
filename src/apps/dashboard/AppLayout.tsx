@@ -19,7 +19,6 @@ import { useLocale } from 'hooks/useLocale';
 
 import AppTabs from './components/AppTabs';
 import AppDrawer from './components/drawer/AppDrawer';
-import HelpButton from './components/toolbar/HelpButton';
 import { DASHBOARD_APP_PATHS } from './routes/routes';
 
 import './AppOverrides.scss';
@@ -67,13 +66,10 @@ export const Component: FC = () => {
                             }}
                         >
                             <AppToolbar
-                                isBackButtonAvailable={appRouter.canGoBack()}
+                                isBackButtonAvailable={appRouter.canGoBack() && !isMediumScreen}
                                 isDrawerAvailable={!isMediumScreen && isDrawerAvailable}
                                 isDrawerOpen={isDrawerOpen}
                                 onDrawerButtonClick={onToggleDrawer}
-                                buttons={
-                                    <HelpButton />
-                                }
                             >
                                 {isMetadataManager && (
                                     <ServerButton />
