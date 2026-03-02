@@ -50,7 +50,7 @@ function authenticateUserByName(page, apiClient, url, username, password) {
     });
 }
 
-function authenticateQuickConnect(apiClient, targetUrl) {
+function authenticateQuickConnect(context, apiClient, targetUrl) {
     const url = apiClient.getUrl('/QuickConnect/Initiate');
     apiClient.ajax({ type: 'POST', url }, true).then(res => res.json()).then(function (json) {
         if (!json.Secret || !json.Code) {
@@ -58,13 +58,7 @@ function authenticateQuickConnect(apiClient, targetUrl) {
             return false;
         }
 
-        baseAlert({
-            dialogOptions: {
-                id: 'quickConnectAlert'
-            },
-            title: globalize.translate('QuickConnect'),
-            text: globalize.translate('QuickConnectAuthorizeCode', json.Code)
-        });
+        context.querySelector('.btnQuick').innerHTML = `<span>${json.Code}</span>`;
 
         const connectUrl = apiClient.getUrl('/QuickConnect/Connect?Secret=' + json.Secret);
 
@@ -76,22 +70,10 @@ function authenticateQuickConnect(apiClient, targetUrl) {
 
                 clearInterval(interval);
 
-                // Close the QuickConnect dialog
-                const dlg = document.getElementById('quickConnectAlert');
-                if (dlg) {
-                    dialogHelper.close(dlg);
-                }
-
                 const result = await apiClient.quickConnect(data.Secret);
                 onLoginSuccessful(result.User.Id, result.AccessToken, apiClient, targetUrl);
             }, function (e) {
                 clearInterval(interval);
-
-                // Close the QuickConnect dialog
-                const dlg = document.getElementById('quickConnectAlert');
-                if (dlg) {
-                    dialogHelper.close(dlg);
-                }
 
                 Dashboard.alert({
                     message: globalize.translate('QuickConnectDeactivated'),
@@ -123,11 +105,6 @@ function showManualForm(context, showCancel, focusPassword) {
     context.querySelector('.manualLoginForm').classList.remove('hide');
     context.querySelector('.visualLoginForm').classList.add('hide');
     context.querySelector('.btnManual').classList.add('hide');
-
-    let loginTitle = '';
-    loginTitle += `<img src="${appIcon}" style="width: 20%;height: auto; margin-bottom: 2em;">`;
-    loginTitle += '<h1 class="sectionTitle">Welcome to Jellyfin Media Servessr</h1>';
-    context.querySelector('.loginTitle').innerHTML = loginTitle;
 
     if (focusPassword) {
         context.querySelector('#txtManualPassword').focus();
@@ -257,7 +234,7 @@ export default function (view, params) {
     });
     view.querySelector('.btnCancel').addEventListener('click', showVisualForm);
     view.querySelector('.btnQuick').addEventListener('click', function () {
-        authenticateQuickConnect(getApiClient(), getTargetUrl());
+        authenticateQuickConnect(view, getApiClient(), getTargetUrl());
         return false;
     });
     view.querySelector('.btnManual').addEventListener('click', function () {
@@ -271,6 +248,11 @@ export default function (view, params) {
     view.addEventListener('viewshow', function () {
         loading.show();
         libraryMenu.setTransparentMenu(true);
+
+        let loginTitle = '';
+        loginTitle += `<img src="${appIcon}" style="width: 10%;height: auto; margin-bottom: 2em;">`;
+        loginTitle += '<h1 class="sectionTitle" style="text-align: center;">Welcome to Jellyfin Media Server</h1>';
+        view.querySelector('.loginTitle').innerHTML = loginTitle;
 
         if (!appHost.supports(AppFeature.MultiServer)) {
             view.querySelector('.btnSelectServer').classList.add('hide');
@@ -316,6 +298,9 @@ export default function (view, params) {
                     elem.tabIndex = -1;
                 }
             }
+        });
+        apiClient.getPublicSystemInfo().then(systemInfo => {
+            view.querySelector('.loginTitle').innerHTML += `<span style="text-align: center;margin-bottom: 2em;">Authenticate to: ${systemInfo.ServerName}</span>`;
         });
     });
     view.addEventListener('viewhide', function () {

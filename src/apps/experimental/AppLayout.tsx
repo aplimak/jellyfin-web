@@ -24,6 +24,7 @@ export const Component = () => {
     const isMediumScreen = useMediaQuery((t: Theme) => t.breakpoints.up('md'));
     const isDrawerAvailable = isDrawerPath(location.pathname) && Boolean(user) && !isMediumScreen;
     const isDrawerOpen = isDrawerActive && isDrawerAvailable;
+    const isLoginPage = '/login'.includes(location.pathname);
 
     const onToggleDrawer = useCallback(() => {
         setIsDrawerActive(!isDrawerActive);
@@ -33,7 +34,7 @@ export const Component = () => {
         <>
             <Box sx={{ position: 'relative', display: 'flex', height: '100%' }}>
                 <StrictMode>
-                    <ElevationScroll elevate={false}>
+                    <ElevationScroll elevate={false} alwaysTransparent={isLoginPage}>
                         <AppBar
                             position='fixed'
                             sx={{
