@@ -50,7 +50,7 @@ function authenticateUserByName(page, apiClient, url, username, password) {
     });
 }
 
-function authenticateQuickConnect(apiClient, targetUrl) {
+function authenticateQuickConnect(context, apiClient, targetUrl) {
     const url = apiClient.getUrl('/QuickConnect/Initiate');
     apiClient.ajax({ type: 'POST', url }, true).then(res => res.json()).then(function (json) {
         if (!json.Secret || !json.Code) {
@@ -58,13 +58,7 @@ function authenticateQuickConnect(apiClient, targetUrl) {
             return false;
         }
 
-        baseAlert({
-            dialogOptions: {
-                id: 'quickConnectAlert'
-            },
-            title: globalize.translate('QuickConnect'),
-            text: globalize.translate('QuickConnectAuthorizeCode', json.Code)
-        });
+        context.querySelector('.btnQuick').innerHTML = `<span>${json.Code}</span>`;
 
         const connectUrl = apiClient.getUrl('/QuickConnect/Connect?Secret=' + json.Secret);
 
@@ -76,22 +70,10 @@ function authenticateQuickConnect(apiClient, targetUrl) {
 
                 clearInterval(interval);
 
-                // Close the QuickConnect dialog
-                const dlg = document.getElementById('quickConnectAlert');
-                if (dlg) {
-                    dialogHelper.close(dlg);
-                }
-
                 const result = await apiClient.quickConnect(data.Secret);
                 onLoginSuccessful(result.User.Id, result.AccessToken, apiClient, targetUrl);
             }, function (e) {
                 clearInterval(interval);
-
-                // Close the QuickConnect dialog
-                const dlg = document.getElementById('quickConnectAlert');
-                if (dlg) {
-                    dialogHelper.close(dlg);
-                }
 
                 Dashboard.alert({
                     message: globalize.translate('QuickConnectDeactivated'),
@@ -252,7 +234,7 @@ export default function (view, params) {
     });
     view.querySelector('.btnCancel').addEventListener('click', showVisualForm);
     view.querySelector('.btnQuick').addEventListener('click', function () {
-        authenticateQuickConnect(getApiClient(), getTargetUrl());
+        authenticateQuickConnect(view, getApiClient(), getTargetUrl());
         return false;
     });
     view.querySelector('.btnManual').addEventListener('click', function () {
