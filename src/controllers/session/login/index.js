@@ -16,8 +16,6 @@ import '../../../components/cardbuilder/card.scss';
 import '../../../elements/emby-checkbox/emby-checkbox';
 import Dashboard from '../../../utils/dashboard';
 import toast from '../../../components/toast/toast';
-import dialogHelper from '../../../components/dialogHelper/dialogHelper';
-import baseAlert from '../../../components/alert';
 import { getDefaultBackgroundClass } from '../../../components/cardbuilder/cardBuilderUtils';
 
 import appIcon from '@jellyfin/ux-web/icon-transparent.png';
@@ -250,7 +248,7 @@ export default function (view, params) {
         libraryMenu.setTransparentMenu(true);
 
         let loginTitle = '';
-        loginTitle += `<img src="${appIcon}" style="width: 10%;height: auto; margin-bottom: 2em;">`;
+        loginTitle += `<img src="${appIcon}" style="width: auto;height: 15vh; margin-bottom: 3vh;">`;
         loginTitle += '<h1 class="sectionTitle" style="text-align: center;">Welcome to Jellyfin Media Server</h1>';
         view.querySelector('.loginTitle').innerHTML = loginTitle;
 
