@@ -33,6 +33,9 @@ const ExperimentalAppToolbar: FC<AppToolbarProps> = ({
     // Check if the current path is a public path to hide user content
     const isPublicPath = PUBLIC_PATHS.includes(location.pathname);
 
+    // Hide server name on login page
+    const isLoginPage = '/login'.includes(location.pathname);
+
     return (
         <AppToolbar
             buttons={!isPublicPath && (
@@ -48,7 +51,7 @@ const ExperimentalAppToolbar: FC<AppToolbarProps> = ({
             isBackButtonAvailable={isBackButtonAvailable}
             isUserMenuAvailable={!isPublicPath}
         >
-            {!isDrawerAvailable && (
+            {!isDrawerAvailable && !isLoginPage && (
                 <Stack
                     direction='row'
                     spacing={0.5}
