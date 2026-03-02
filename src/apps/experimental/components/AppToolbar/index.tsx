@@ -41,6 +41,9 @@ const ExperimentalAppToolbar: FC<AppToolbarProps> = ({
     // Check if current path is a library route to show LibraryViewMenu
     const isLibraryRoute = LibraryRoutes.some(({ path }) => path === location.pathname);
 
+    // Hide server name on login page
+    const isLoginPage = '/login'.includes(location.pathname);
+
     return (
         <AppToolbar
             buttons={!isPublicPath && (
@@ -57,7 +60,7 @@ const ExperimentalAppToolbar: FC<AppToolbarProps> = ({
             isBackButtonAvailable={isBackButtonAvailable}
             isUserMenuAvailable={!isPublicPath}
         >
-            {!isDrawerAvailable && (
+            {!isDrawerAvailable && !isLoginPage && (
                 <Stack
                     direction='row'
                     spacing={0.5}

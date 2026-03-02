@@ -20,6 +20,8 @@ import dialogHelper from '../../../components/dialogHelper/dialogHelper';
 import baseAlert from '../../../components/alert';
 import { getDefaultBackgroundClass } from '../../../components/cardbuilder/cardBuilderUtils';
 
+import appIcon from '@jellyfin/ux-web/icon-transparent.png';
+
 import './login.scss';
 
 const enableFocusTransform = !browser.slow && !browser.edge;
@@ -118,10 +120,14 @@ function onLoginSuccessful(id, accessToken, apiClient, url) {
 }
 
 function showManualForm(context, showCancel, focusPassword) {
-    context.querySelector('.chkRememberLogin').checked = appSettings.enableAutoLogin();
     context.querySelector('.manualLoginForm').classList.remove('hide');
     context.querySelector('.visualLoginForm').classList.add('hide');
     context.querySelector('.btnManual').classList.add('hide');
+
+    let loginTitle = '';
+    loginTitle += `<img src="${appIcon}" style="width: 20%;height: auto; margin-bottom: 2em;">`;
+    loginTitle += '<h1 class="sectionTitle">Welcome to Jellyfin Media Servessr</h1>';
+    context.querySelector('.loginTitle').innerHTML = loginTitle;
 
     if (focusPassword) {
         context.querySelector('#txtManualPassword').focus();
@@ -241,7 +247,7 @@ export default function (view, params) {
         }
     });
     view.querySelector('.manualLoginForm').addEventListener('submit', function (e) {
-        appSettings.enableAutoLogin(view.querySelector('.chkRememberLogin').checked);
+        appSettings.enableAutoLogin(true);
         authenticateUserByName(view, getApiClient(), getTargetUrl(), view.querySelector('#txtManualName').value, view.querySelector('#txtManualPassword').value);
         e.preventDefault();
         return false;
