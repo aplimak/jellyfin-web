@@ -126,7 +126,7 @@ function showManualForm(context, showCancel, focusPassword) {
 
     let loginTitle = '';
     loginTitle += `<img src="${appIcon}" style="width: 20%;height: auto; margin-bottom: 2em;">`;
-    loginTitle += '<h1 class="sectionTitle">Welcome to Jellyfin Media Server</h1>';
+    loginTitle += '<h1 class="sectionTitle" style="text-align: center;">Welcome to Jellyfin Media Server</h1>';
     context.querySelector('.loginTitle').innerHTML = loginTitle;
 
     if (focusPassword) {
