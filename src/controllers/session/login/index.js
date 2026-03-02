@@ -124,11 +124,6 @@ function showManualForm(context, showCancel, focusPassword) {
     context.querySelector('.visualLoginForm').classList.add('hide');
     context.querySelector('.btnManual').classList.add('hide');
 
-    let loginTitle = '';
-    loginTitle += `<img src="${appIcon}" style="width: 20%;height: auto; margin-bottom: 2em;">`;
-    loginTitle += '<h1 class="sectionTitle" style="text-align: center;">Welcome to Jellyfin Media Server</h1>';
-    context.querySelector('.loginTitle').innerHTML = loginTitle;
-
     if (focusPassword) {
         context.querySelector('#txtManualPassword').focus();
     } else {
@@ -272,6 +267,11 @@ export default function (view, params) {
         loading.show();
         libraryMenu.setTransparentMenu(true);
 
+        let loginTitle = '';
+        loginTitle += `<img src="${appIcon}" style="width: 10%;height: auto; margin-bottom: 2em;">`;
+        loginTitle += '<h1 class="sectionTitle" style="text-align: center;">Welcome to Jellyfin Media Server</h1>';
+        view.querySelector('.loginTitle').innerHTML = loginTitle;
+
         if (!appHost.supports(AppFeature.MultiServer)) {
             view.querySelector('.btnSelectServer').classList.add('hide');
         }
@@ -316,6 +316,9 @@ export default function (view, params) {
                     elem.tabIndex = -1;
                 }
             }
+        });
+        apiClient.getPublicSystemInfo().then(systemInfo => {
+            view.querySelector('.loginTitle').innerHTML += `<span style="text-align: center;margin-bottom: 2em;">Authenticate to: ${systemInfo.ServerName}</span>`;
         });
     });
     view.addEventListener('viewhide', function () {
