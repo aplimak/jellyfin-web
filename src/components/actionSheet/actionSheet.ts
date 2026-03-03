@@ -246,14 +246,20 @@ export function show(options: Options) {
         menuItemClass += ' actionsheet-xlargeFont';
     }
 
+    // To prevent repeated empty sections
+    let lastItemWasDivider = true;
+
     // 'options.items' is HTMLOptionsCollection, so no fancy loops
     for (let i = 0; i < options.items.length; i++) {
         const item = options.items[i];
+        const lastItem = i == options.items.length - 1;
 
         if (item.divider) {
-            html += '<div class="actionsheetDivider"></div>';
+            if (!lastItemWasDivider && !lastItem) html += '<div class="actionsheetDivider"></div>';
+            lastItemWasDivider = true;
             continue;
         }
+        lastItemWasDivider = false;
 
         const autoFocus = item.selected && layoutManager.tv ? ' autoFocus' : '';
 

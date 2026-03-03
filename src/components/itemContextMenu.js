@@ -182,6 +182,28 @@ export async function getCommands(options) {
         });
     }
 
+    if (commands.length) {
+        commands.push({
+            divider: true
+        });
+    }
+
+    if (item.Type === 'Program' && options.record !== false) {
+        if (item.TimerId) {
+            commands.push({
+                name: globalize.translate('ManageRecording'),
+                id: 'record',
+                icon: 'fiber_manual_record'
+            });
+        } else {
+            commands.push({
+                name: globalize.translate('Record'),
+                id: 'record',
+                icon: 'fiber_manual_record'
+            });
+        }
+    }
+
     if (appHost.supports(AppFeature.FileDownload)) {
         // CanDownload should probably be updated to return true for these items?
         if (user.Policy.EnableContentDownloading && DOWNLOAD_ALL_TYPES.includes(item.Type)) {
@@ -208,17 +230,64 @@ export async function getCommands(options) {
         }
     }
 
-    if (item.CanDelete && options.deleteItem !== false) {
+    if (!browser.tv && options.share === true && itemHelper.canShare(item, user)) {
         commands.push({
-            name: getDeleteLabel(item.Type),
-            id: 'delete',
-            icon: 'delete'
+            name: globalize.translate('Share'),
+            id: 'share',
+            icon: 'share'
         });
     }
 
     if (commands.length) {
         commands.push({
             divider: true
+        });
+    }
+
+    if (options.openAlbum !== false && item.AlbumId && item.MediaType !== 'Photo') {
+        commands.push({
+            name: globalize.translate('ViewAlbum'),
+            id: 'album',
+            icon: 'album'
+        });
+    }
+    // Show Album Artist by default, as a song can have multiple artists, which specific one would this option refer to?
+    // Although some albums can have multiple artists, it's not as common as songs.
+    if (options.openArtist !== false && item.AlbumArtists?.length) {
+        commands.push({
+            name: globalize.translate('ViewAlbumArtist'),
+            id: 'artist',
+            icon: 'person'
+        });
+    }
+
+    if (item.HasLyrics) {
+        commands.push({
+            name: globalize.translate('ViewLyrics'),
+            id: 'lyrics',
+            icon: 'lyrics'
+        });
+    }
+
+    if (commands.length) {
+        commands.push({
+            divider: true
+        });
+    }
+
+    if (options.identify !== false && itemHelper.canIdentify(user, item)) {
+        commands.push({
+            name: globalize.translate('Identify'),
+            id: 'identify',
+            icon: 'search'
+        });
+    }
+
+    if (itemHelper.canRefreshMetadata(item, user)) {
+        commands.push({
+            name: globalize.translate('RefreshMetadata'),
+            id: 'refresh',
+            icon: 'refresh'
         });
     }
 
@@ -267,11 +336,33 @@ export async function getCommands(options) {
         });
     }
 
-    if (options.identify !== false && itemHelper.canIdentify(user, item)) {
+    if (commands.length) {
         commands.push({
-            name: globalize.translate('Identify'),
-            id: 'identify',
-            icon: 'edit'
+            divider: true
+        });
+    }
+
+    if (options.collectionId) {
+        commands.push({
+            name: globalize.translate('RemoveFromCollection'),
+            id: 'removefromcollection',
+            icon: 'playlist_remove'
+        });
+    }
+
+    if (item.PlaylistItemId && options.playlistId && options.canEditPlaylist) {
+        commands.push({
+            name: globalize.translate('RemoveFromPlaylist'),
+            id: 'removefromplaylist',
+            icon: 'playlist_remove'
+        });
+    }
+
+    if (item.CanDelete && options.deleteItem !== false) {
+        commands.push({
+            name: getDeleteLabel(item.Type),
+            id: 'delete',
+            icon: 'delete'
         });
     }
 
@@ -283,35 +374,9 @@ export async function getCommands(options) {
         });
     }
 
-    if (item.Type === 'Program' && options.record !== false) {
-        if (item.TimerId) {
-            commands.push({
-                name: globalize.translate('ManageRecording'),
-                id: 'record',
-                icon: 'fiber_manual_record'
-            });
-        } else {
-            commands.push({
-                name: globalize.translate('Record'),
-                id: 'record',
-                icon: 'fiber_manual_record'
-            });
-        }
-    }
-
-    if (itemHelper.canRefreshMetadata(item, user)) {
+    if (commands.length) {
         commands.push({
-            name: globalize.translate('RefreshMetadata'),
-            id: 'refresh',
-            icon: 'refresh'
-        });
-    }
-
-    if (item.PlaylistItemId && options.playlistId && options.canEditPlaylist) {
-        commands.push({
-            name: globalize.translate('RemoveFromPlaylist'),
-            id: 'removefromplaylist',
-            icon: 'playlist_remove'
+            divider: true
         });
     }
 
@@ -328,47 +393,6 @@ export async function getCommands(options) {
             name: globalize.translate('MoveToBottom'),
             id: 'movetobottom',
             icon: 'vertical_align_bottom'
-        });
-    }
-
-    if (options.collectionId) {
-        commands.push({
-            name: globalize.translate('RemoveFromCollection'),
-            id: 'removefromcollection',
-            icon: 'playlist_remove'
-        });
-    }
-
-    if (!browser.tv && options.share === true && itemHelper.canShare(item, user)) {
-        commands.push({
-            name: globalize.translate('Share'),
-            id: 'share',
-            icon: 'share'
-        });
-    }
-
-    if (options.openAlbum !== false && item.AlbumId && item.MediaType !== 'Photo') {
-        commands.push({
-            name: globalize.translate('ViewAlbum'),
-            id: 'album',
-            icon: 'album'
-        });
-    }
-    // Show Album Artist by default, as a song can have multiple artists, which specific one would this option refer to?
-    // Although some albums can have multiple artists, it's not as common as songs.
-    if (options.openArtist !== false && item.AlbumArtists?.length) {
-        commands.push({
-            name: globalize.translate('ViewAlbumArtist'),
-            id: 'artist',
-            icon: 'person'
-        });
-    }
-
-    if (item.HasLyrics) {
-        commands.push({
-            name: globalize.translate('ViewLyrics'),
-            id: 'lyrics',
-            icon: 'lyrics'
         });
     }
 
