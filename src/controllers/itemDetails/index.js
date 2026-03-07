@@ -32,7 +32,7 @@ import dom from 'utils/dom';
 import { download } from 'scripts/fileDownloader';
 import libraryMenu from 'scripts/libraryMenu';
 import * as userSettings from 'scripts/settings/userSettings';
-import { getPortraitShape, getSquareShape } from 'utils/card';
+import { getPortraitShape, getSquareShape, getBackdropShape } from 'utils/card';
 import Dashboard from 'utils/dashboard';
 import Events from 'utils/events';
 import { getItemBackdropImageUrl } from 'utils/jellyfin-apiclient/backdropImage';
@@ -555,7 +555,7 @@ function renderHeaderBackdrop(page, item, apiClient) {
     return hasbackdrop;
 }
 
-function reloadFromItem(instance, page, params, item, user) {
+function reloadFromItem(instance, page, params, item, user, hideFinishedItems) {
     const apiClient = ServerConnections.getApiClient(item.ServerId);
 
     libraryMenu.setTitle('');
@@ -579,7 +579,7 @@ function reloadFromItem(instance, page, params, item, user) {
 
     renderSeriesTimerEditor(page, item, apiClient, user);
     renderTimerEditor(page, item, apiClient, user);
-    setInitialCollapsibleState(page, item, apiClient, params.context, user);
+    setInitialCollapsibleState(page, item, apiClient, params.context, user, hideFinishedItems);
     const canPlay = reloadPlayButtons(page, item);
 
     setTrailerButtonVisibility(page, item);
@@ -820,7 +820,7 @@ function renderNextUp(page, item, user) {
     });
 }
 
-function setInitialCollapsibleState(page, item, apiClient, context, user) {
+function setInitialCollapsibleState(page, item, apiClient, context, user, hideFinishedItems = true) {
     page.querySelector('.collectionItems').innerHTML = '';
 
     if (item.Type == 'Playlist') {
@@ -837,7 +837,7 @@ function setInitialCollapsibleState(page, item, apiClient, context, user) {
             page.querySelector('#childrenCollapsible').classList.add('hide');
         }
 
-        renderChildren(page, item);
+        renderChildren(page, item, hideFinishedItems);
     } else {
         page.querySelector('#listChildrenCollapsible').classList.add('hide');
         page.querySelector('#childrenCollapsible').classList.add('hide');
@@ -1362,7 +1362,7 @@ function renderTags(page, item) {
     }
 }
 
-function renderChildren(page, item) {
+function renderChildren(page, item, hideFinishedItems) {
     const childrenCollapsible = page.querySelector(LIST_VIEW_TYPES.includes(item.Type) ? '#listChildrenCollapsible' : '#childrenCollapsible');
     const childrenItemsContainer = childrenCollapsible.querySelector('.itemsContainer');
 
@@ -1525,7 +1525,7 @@ function renderChildren(page, item) {
                 name: globalize.translate('Collections'),
                 type: 'BoxSet'
             }];
-            renderCollectionItems(page, item, collectionItemTypes, result.Items);
+            renderCollectionItems(page, item, collectionItemTypes, result.Items, hideFinishedItems);
         }
     });
 
@@ -1708,13 +1708,28 @@ function canPlaySomeItemInCollection(items) {
     return false;
 }
 
-function renderCollectionItems(page, parentItem, types, items) {
+function renderCollectionItems(page, parentItem, types, items, hideFinishedItems) {
     page.querySelector('.collectionItems').classList.remove('hide');
     page.querySelector('.collectionItems').innerHTML = '';
 
+    const finalItems = [];
+    let haveAnyPlayed = false;
+
+    for (const item of items) {
+        if (item.UserData && item.UserData.Played) {
+            haveAnyPlayed = true;
+            continue;
+        }
+        finalItems.push(item);
+    }
+
+    if (hideFinishedItems) {
+        items = finalItems;
+    }
+
     if (!items.length) {
         renderCollectionItemType(page, parentItem, {
-            name: globalize.translate('Items')
+            name: 'No Items Avaiable'
         }, items);
     } else {
         let typeItems = [];
@@ -1739,7 +1754,7 @@ function renderCollectionItems(page, parentItem, types, items) {
     const containers = page.querySelectorAll('.collectionItemsContainer');
 
     const notifyRefreshNeeded = function () {
-        renderChildren(page, parentItem);
+        renderChildren(page, parentItem, hideFinishedItems);
     };
 
     for (const container of containers) {
@@ -1747,9 +1762,25 @@ function renderCollectionItems(page, parentItem, types, items) {
     }
 
     // if nothing in the collection can be played hide play and shuffle buttons
-    if (!canPlaySomeItemInCollection(items)) {
+    if (!canPlaySomeItemInCollection(items) || hideFinishedItems) {
         hideAll(page, 'btnPlay', false);
         hideAll(page, 'btnShuffle', false);
+    }
+
+    if (haveAnyPlayed) {
+        if (hideFinishedItems) {
+            page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility');
+            page.querySelector('#btnFilterPlayedIcon').classList.add('visibility_off');
+            hideAll(page, 'itemMiscInfo');
+        } else {
+            page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility_off');
+            page.querySelector('#btnFilterPlayedIcon').classList.add('visibility');
+            hideAll(page, 'itemMiscInfo', true);
+        }
+
+        hideAll(page, 'btnFilterPlayed', true);
+    } else {
+        hideAll(page, 'btnFilterPlayed');
     }
 
     // HACK: Call autoFocuser again because btnPlay may be hidden, but focused by reloadFromItem
@@ -1766,7 +1797,8 @@ function renderCollectionItemType(page, parentItem, type, items) {
     html += '</h2>';
     html += '</div>';
     html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left padded-right">';
-    const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : getPortraitShape(false);
+    const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : type.type == 'Movie' ? getBackdropShape(false) : getPortraitShape(false);
+
     html += cardBuilder.getCardsHtml({
         items: items,
         shape: shape,
@@ -1941,7 +1973,7 @@ export default function (view, params) {
 
         Promise.all([getPromise(apiClient, pageParams), apiClient.getCurrentUser()]).then(([item, user]) => {
             currentItem = item;
-            reloadFromItem(instance, page, pageParams, item, user);
+            reloadFromItem(instance, page, pageParams, item, user, hideFinishedItems);
         }).catch((error) => {
             console.error('failed to get item or current user: ', error);
         });
@@ -2032,6 +2064,11 @@ export default function (view, params) {
         });
     }
 
+    function onFilterPlayedClick() {
+        hideFinishedItems = !hideFinishedItems;
+        reload(self, view, params);
+    }
+
     function onPlayTrailerClick() {
         playTrailer();
     }
@@ -2102,6 +2139,7 @@ export default function (view, params) {
     }
 
     let currentItem;
+    let hideFinishedItems = false;
     const self = this;
 
     function init() {
@@ -2114,6 +2152,7 @@ export default function (view, params) {
         bindAll(view, '.btnPlayTrailer', 'click', onPlayTrailerClick);
         bindAll(view, '.btnCancelSeriesTimer', 'click', onCancelSeriesTimerClick);
         bindAll(view, '.btnCancelTimer', 'click', onCancelTimerClick);
+        bindAll(view, '.btnFilterPlayed', 'click', onFilterPlayedClick);
         bindAll(view, '.btnDownload', 'click', onDownloadClick);
         view.querySelector('.trackSelections').addEventListener('submit', onTrackSelectionsSubmit);
         view.querySelector('.btnSplitVersions').addEventListener('click', function () {
