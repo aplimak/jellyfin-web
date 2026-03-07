@@ -4,8 +4,6 @@
  */
 
 import { BaseItemDto } from '@jellyfin/sdk/lib/generated-client';
-import { getItemsApi } from '@jellyfin/sdk/lib/utils/api/items-api';
-import { getUserApi } from '@jellyfin/sdk/lib/utils/api/user-api';
 import { ServerConnections } from 'lib/jellyfin-apiclient';
 import type { ScriptContext } from '../types/ScriptContext';
 
@@ -14,21 +12,17 @@ export default {
     description: 'Convert production years to premiere dates for media items without premiere dates',
     execute: async (context: ScriptContext) => {
         try {
-            const userApi = getUserApi(context.api);
-            const { data: users } = await userApi.getUsers();
-            const currentUser = users[0];
-
-            if (!currentUser?.Id) {
-                context.log('E: Could not get user information');
+            const apiClient = ServerConnections.currentApiClient();
+            if (!apiClient) {
+                context.fail('Can\'t get api client');
                 return;
             }
 
+            const userId = apiClient.getCurrentUserId();
+
             context.log('I: Fetching all media items...');
 
-            const itemsApi = getItemsApi(context.api);
-
-            const { data: items } = await itemsApi.getItems({
-                userId: currentUser.Id,
+            const items = await apiClient.getItems(userId, {
                 recursive: true,
                 includeItemTypes: ['Movie', 'Series', 'Episode', 'MusicAlbum', 'Audio', 'Book'],
                 sortBy: ['ProductionYear'],
@@ -36,7 +30,7 @@ export default {
             });
 
             if (!items.Items || items.Items.length === 0) {
-                context.log('W: No media items found in your library.');
+                context.fail('No media items found in your library.');
                 return;
             }
 
@@ -44,15 +38,13 @@ export default {
             for (const item of items.Items) {
                 if (item.Type === 'BoxSet' && item.Id) {
                     // Fetch child items of the boxset
-                    const boxSetItems = await itemsApi.getItems({
-                        userId: currentUser.Id,
+                    const boxSetItems = await apiClient.getItems(userId, {
                         parentId: item.Id,
                         recursive: true,
                         includeItemTypes: ['Movie', 'Series', 'Episode', 'MusicAlbum', 'Audio', 'Book']
                     });
-                    if (boxSetItems.data.Items) {
-                        items.Items.push(...boxSetItems.data.Items);
-                        context.log(`I: Added ${boxSetItems.data.Items.length} items from boxset "${item.Name}"`);
+                    if (boxSetItems.Items) {
+                        items.Items.push(...boxSetItems.Items);
                     }
                 }
             }
@@ -61,7 +53,7 @@ export default {
             items.Items = items.Items.filter(item => item.Type !== 'BoxSet');
 
             // List of items with year and without prod date
-            const itemsWithYearNoPremiere: BaseItemDto[] = [];
+            const eligibleItems: BaseItemDto[] = [];
 
             items.Items.forEach((item) => {
                 const year = item.ProductionYear;
@@ -101,20 +93,20 @@ export default {
                     return;
                 }
 
-                itemsWithYearNoPremiere.push(item);
+                eligibleItems.push(item);
             });
 
             context.log(`All items: ${items.Items.length}`);
-            context.log(`Items with production year but no premiere date: ${itemsWithYearNoPremiere.length}`);
+            context.log(`Eligible items: ${eligibleItems.length}`);
 
-            if (itemsWithYearNoPremiere.length === 0) {
-                context.log('No items need premiere date updates.');
+            if (eligibleItems.length === 0) {
+                context.skip('Nothing to do');
                 return;
             }
 
             // Use context.confirm for user confirmation
             const shouldContinue = await context.confirm(
-                `This will update premiere dates for ${itemsWithYearNoPremiere.length} items based on their production year. Continue?`
+                `This will update premiere dates for ${eligibleItems.length} items based on their production year. Continue?`
             );
 
             if (!shouldContinue) {
@@ -122,22 +114,14 @@ export default {
                 return;
             }
 
-            context.log('I: User confirmed. Starting updates...');
-
             try {
-                const apiClient = ServerConnections.currentApiClient();
-                if (!apiClient) {
-                    context.log('E: Can\'t get api client');
-                    return;
-                }
-
-                for (const item of itemsWithYearNoPremiere) {
+                for (const item of eligibleItems) {
                     context.log(`I: Processing: ${item.Name}`);
                     let fullItem;
 
                     try {
                         fullItem = await apiClient.getItem(
-                            apiClient.getCurrentUserId(),
+                            userId,
                             item.Id!
                         );
                     } catch {
