@@ -1741,10 +1741,10 @@ function renderCollectionItems(page, parentItem, types, items) {
     page.querySelector('.collectionItems').classList.remove('hide');
     page.querySelector('.collectionItems').innerHTML = '';
 
-    const hideFinishedItems = getHideFinishedItems(parentItem);
-
     const filteredItems = filterPlayedItems(items);
     const haveAnyPlayed = filteredItems.length < items.length;
+    const haveAnyNotPlayed = filteredItems.length == 0;
+    const hideFinishedItems = !haveAnyNotPlayed && getHideFinishedItems(parentItem);
 
     if (hideFinishedItems) {
         items = filteredItems;
@@ -1790,21 +1790,17 @@ function renderCollectionItems(page, parentItem, types, items) {
         hideAll(page, 'btnShuffle', false);
     }
 
-    if (haveAnyPlayed) {
-        if (hideFinishedItems) {
-            page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility');
-            page.querySelector('#btnFilterPlayedIcon').classList.add('visibility_off');
-            hideAll(page, 'itemMiscInfo');
-        } else {
-            page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility_off');
-            page.querySelector('#btnFilterPlayedIcon').classList.add('visibility');
-            hideAll(page, 'itemMiscInfo', true);
-        }
-
-        hideAll(page, 'btnFilterPlayed', true);
+    const shouldVisible = hideFinishedItems || (!haveAnyNotPlayed && haveAnyPlayed);
+    hideAll(page, 'btnFilterPlayed', shouldVisible);
+    if (hideFinishedItems) {
+        page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility');
+        page.querySelector('#btnFilterPlayedIcon').classList.add('visibility_off');
     } else {
-        hideAll(page, 'btnFilterPlayed');
+        page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility_off');
+        page.querySelector('#btnFilterPlayedIcon').classList.add('visibility');
     }
+
+    hideAll(page, 'itemMiscInfo');
 
     // HACK: Call autoFocuser again because btnPlay may be hidden, but focused by reloadFromItem
     // FIXME: Sometimes focus does not move until all (?) sections are loaded
@@ -1817,6 +1813,9 @@ function renderCollectionItemType(page, parentItem, type, items) {
     html += '<div class="sectionTitleContainer sectionTitleContainer-cards padded-left">';
     html += '<h2 class="sectionTitle sectionTitle-cards">';
     html += '<span>' + type.name + '</span>';
+    if (items && items.length > 0) {
+        html += '<span> (' + items.length + ')</span>';
+    }
     html += '</h2>';
     html += '</div>';
     html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left padded-right">';
