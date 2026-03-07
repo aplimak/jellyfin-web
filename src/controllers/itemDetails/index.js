@@ -1725,25 +1725,29 @@ function canPlaySomeItemInCollection(items) {
     return false;
 }
 
+function filterPlayedItems(items) {
+    const filteredItems = [];
+    for (const item of items) {
+        if (item.UserData && item.UserData.Played) {
+            continue;
+        }
+        filteredItems.push(item);
+    }
+
+    return filteredItems;
+}
+
 function renderCollectionItems(page, parentItem, types, items) {
     page.querySelector('.collectionItems').classList.remove('hide');
     page.querySelector('.collectionItems').innerHTML = '';
 
     const hideFinishedItems = getHideFinishedItems(parentItem);
 
-    const finalItems = [];
-    let haveAnyPlayed = false;
-
-    for (const item of items) {
-        if (item.UserData && item.UserData.Played) {
-            haveAnyPlayed = true;
-            continue;
-        }
-        finalItems.push(item);
-    }
+    const filteredItems = filterPlayedItems(items);
+    const haveAnyPlayed = filteredItems.length < items.length;
 
     if (hideFinishedItems) {
-        items = finalItems;
+        items = filteredItems;
     }
 
     if (!items.length) {
@@ -1781,7 +1785,7 @@ function renderCollectionItems(page, parentItem, types, items) {
     }
 
     // if nothing in the collection can be played hide play and shuffle buttons
-    if (!canPlaySomeItemInCollection(items) || hideFinishedItems) {
+    if (!canPlaySomeItemInCollection(items)) {
         hideAll(page, 'btnPlay', false);
         hideAll(page, 'btnShuffle', false);
     }
@@ -2023,8 +2027,17 @@ export default function (view, params) {
 
     function playItem(item, startPosition) {
         const playOptions = getPlayOptions(startPosition);
-        playOptions.items = [item];
-        playbackManager.play(playOptions);
+        const hidePlayed = getHideFinishedItems(item);
+        if (item.Type == 'BoxSet' && hidePlayed) {
+            playbackManager.translateItemsForPlayback([item], playOptions).then(items => {
+                const filteredItems = filterPlayedItems(items);
+                playOptions.items = filteredItems;
+                playbackManager.play(playOptions);
+            });
+        } else {
+            playOptions.items = [item];
+            playbackManager.play(playOptions);
+        }
     }
 
     function playTrailer() {
@@ -2064,7 +2077,19 @@ export default function (view, params) {
     }
 
     function onShuffleClick() {
-        playbackManager.shuffle(currentItem);
+        const playbackOptions = {
+            shuffle: true
+        };
+        const hidePlayed = getHideFinishedItems(currentItem);
+        if (currentItem.Type == 'BoxSet' && hidePlayed) {
+            playbackManager.translateItemsForPlayback([currentItem], playbackOptions).then(items => {
+                const filteredItems = filterPlayedItems(items);
+                playbackOptions.items = filteredItems;
+                playbackManager.play(playbackOptions);
+            });
+        } else {
+            playbackManager.shuffle(currentItem);
+        }
     }
 
     function onCancelSeriesTimerClick() {
