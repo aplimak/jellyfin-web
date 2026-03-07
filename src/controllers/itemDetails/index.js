@@ -283,7 +283,7 @@ function renderAudioSelections(page, mediaSources) {
     const selectedId = mediaSource.DefaultAudioStreamIndex;
     select.innerHTML = tracks.map(function (v) {
         const selected = v.Index === selectedId ? ' selected' : '';
-        return '<option value="' + v.Index + '" ' + selected + '>' + v.DisplayTitle + '</option>';
+        return '<option value="' + v.Index + '" ' + selected + '>' + v.DisplayTitle.replaceAll('- ', '').replace(new RegExp(' Default$'), '') + '</option>';
     }).join('');
 
     if (tracks.length > 1) {
