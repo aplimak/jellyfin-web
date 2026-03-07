@@ -313,7 +313,7 @@ function renderSubtitleSelections(page, mediaSources) {
     let selected = selectedId === -1 ? ' selected' : '';
     select.innerHTML = '<option value="-1">' + globalize.translate('Off') + '</option>' + tracks.map(function (v) {
         selected = v.Index === selectedId ? ' selected' : '';
-        return '<option value="' + v.Index + '" ' + selected + '>' + v.DisplayTitle + '</option>';
+        return '<option value="' + v.Index + '" ' + selected + '>' + v.DisplayTitle.replace('- Default -', '').replaceAll('- ', '') + '</option>';
     }).join('');
 
     if (tracks.length > 0) {
