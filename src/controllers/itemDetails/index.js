@@ -242,9 +242,13 @@ function renderVideoSelections(page, mediaSources) {
     select.innerHTML = tracks.map(function (v) {
         const selected = v.Index === selectedId ? ' selected' : '';
         const titleParts = [];
-        const resolutionText = mediaInfo.getResolutionText(v);
+        let resolutionText = mediaInfo.getResolutionText(v);
 
         if (resolutionText) {
+            const fps = v.ReferenceFrameRate;
+            if (fps && fps > 30) {
+                resolutionText += fps;
+            }
             titleParts.push(resolutionText);
         }
 
@@ -252,7 +256,11 @@ function renderVideoSelections(page, mediaSources) {
             titleParts.push(v.Codec.toUpperCase());
         }
 
-        return '<option value="' + v.Index + '" ' + selected + '>' + (v.DisplayTitle || titleParts.join(' ')) + '</option>';
+        if (v.VideoRange) {
+            titleParts.push(v.VideoRange);
+        }
+
+        return '<option value="' + v.Index + '" ' + selected + '>' + (titleParts.join(' ')) + '</option>';
     }).join('');
     select.setAttribute('disabled', 'disabled');
 
@@ -275,7 +283,7 @@ function renderAudioSelections(page, mediaSources) {
     const selectedId = mediaSource.DefaultAudioStreamIndex;
     select.innerHTML = tracks.map(function (v) {
         const selected = v.Index === selectedId ? ' selected' : '';
-        return '<option value="' + v.Index + '" ' + selected + '>' + v.DisplayTitle + '</option>';
+        return '<option value="' + v.Index + '" ' + selected + '>' + v.DisplayTitle.replaceAll('- ', '').replace(new RegExp(' Default$'), '') + '</option>';
     }).join('');
 
     if (tracks.length > 1) {
@@ -305,7 +313,7 @@ function renderSubtitleSelections(page, mediaSources) {
     let selected = selectedId === -1 ? ' selected' : '';
     select.innerHTML = '<option value="-1">' + globalize.translate('Off') + '</option>' + tracks.map(function (v) {
         selected = v.Index === selectedId ? ' selected' : '';
-        return '<option value="' + v.Index + '" ' + selected + '>' + v.DisplayTitle + '</option>';
+        return '<option value="' + v.Index + '" ' + selected + '>' + v.DisplayTitle.replace('- Default -', '').replaceAll('- ', '') + '</option>';
     }).join('');
 
     if (tracks.length > 0) {
