@@ -88,6 +88,23 @@ function getPromise(apiClient, params) {
     throw new Error('Invalid request');
 }
 
+function getHideFinishedItems(item) {
+    const storedHideFinishedItems = localStorage.getItem('aeliux_hidePlayedItems');
+
+    if (item && item.Type != 'BoxSet') {
+        return false;
+    }
+
+    if (storedHideFinishedItems) {
+        const lowered = storedHideFinishedItems.toLowerCase();
+        if (lowered == 'true') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function hideAll(page, className, show) {
     for (const elem of page.querySelectorAll('.' + className)) {
         if (show) {
@@ -555,7 +572,7 @@ function renderHeaderBackdrop(page, item, apiClient) {
     return hasbackdrop;
 }
 
-function reloadFromItem(instance, page, params, item, user, hideFinishedItems) {
+function reloadFromItem(instance, page, params, item, user) {
     const apiClient = ServerConnections.getApiClient(item.ServerId);
 
     libraryMenu.setTitle('');
@@ -579,7 +596,7 @@ function reloadFromItem(instance, page, params, item, user, hideFinishedItems) {
 
     renderSeriesTimerEditor(page, item, apiClient, user);
     renderTimerEditor(page, item, apiClient, user);
-    setInitialCollapsibleState(page, item, apiClient, params.context, user, hideFinishedItems);
+    setInitialCollapsibleState(page, item, apiClient, params.context, user);
     const canPlay = reloadPlayButtons(page, item);
 
     setTrailerButtonVisibility(page, item);
@@ -820,7 +837,7 @@ function renderNextUp(page, item, user) {
     });
 }
 
-function setInitialCollapsibleState(page, item, apiClient, context, user, hideFinishedItems = true) {
+function setInitialCollapsibleState(page, item, apiClient, context, user) {
     page.querySelector('.collectionItems').innerHTML = '';
 
     if (item.Type == 'Playlist') {
@@ -837,7 +854,7 @@ function setInitialCollapsibleState(page, item, apiClient, context, user, hideFi
             page.querySelector('#childrenCollapsible').classList.add('hide');
         }
 
-        renderChildren(page, item, hideFinishedItems);
+        renderChildren(page, item);
     } else {
         page.querySelector('#listChildrenCollapsible').classList.add('hide');
         page.querySelector('#childrenCollapsible').classList.add('hide');
@@ -1362,7 +1379,7 @@ function renderTags(page, item) {
     }
 }
 
-function renderChildren(page, item, hideFinishedItems) {
+function renderChildren(page, item) {
     const childrenCollapsible = page.querySelector(LIST_VIEW_TYPES.includes(item.Type) ? '#listChildrenCollapsible' : '#childrenCollapsible');
     const childrenItemsContainer = childrenCollapsible.querySelector('.itemsContainer');
 
@@ -1525,7 +1542,7 @@ function renderChildren(page, item, hideFinishedItems) {
                 name: globalize.translate('Collections'),
                 type: 'BoxSet'
             }];
-            renderCollectionItems(page, item, collectionItemTypes, result.Items, hideFinishedItems);
+            renderCollectionItems(page, item, collectionItemTypes, result.Items);
         }
     });
 
@@ -1708,23 +1725,29 @@ function canPlaySomeItemInCollection(items) {
     return false;
 }
 
-function renderCollectionItems(page, parentItem, types, items, hideFinishedItems) {
+function filterPlayedItems(items) {
+    const filteredItems = [];
+    for (const item of items) {
+        if (item.UserData && item.UserData.Played) {
+            continue;
+        }
+        filteredItems.push(item);
+    }
+
+    return filteredItems;
+}
+
+function renderCollectionItems(page, parentItem, types, items) {
     page.querySelector('.collectionItems').classList.remove('hide');
     page.querySelector('.collectionItems').innerHTML = '';
 
-    const finalItems = [];
-    let haveAnyPlayed = false;
-
-    for (const item of items) {
-        if (item.UserData && item.UserData.Played) {
-            haveAnyPlayed = true;
-            continue;
-        }
-        finalItems.push(item);
-    }
+    const filteredItems = filterPlayedItems(items);
+    const haveAnyPlayed = filteredItems.length < items.length;
+    const haveAnyNotPlayed = filteredItems.length == 0;
+    const hideFinishedItems = !haveAnyNotPlayed && getHideFinishedItems(parentItem);
 
     if (hideFinishedItems) {
-        items = finalItems;
+        items = filteredItems;
     }
 
     if (!items.length) {
@@ -1754,7 +1777,7 @@ function renderCollectionItems(page, parentItem, types, items, hideFinishedItems
     const containers = page.querySelectorAll('.collectionItemsContainer');
 
     const notifyRefreshNeeded = function () {
-        renderChildren(page, parentItem, hideFinishedItems);
+        renderChildren(page, parentItem);
     };
 
     for (const container of containers) {
@@ -1762,26 +1785,22 @@ function renderCollectionItems(page, parentItem, types, items, hideFinishedItems
     }
 
     // if nothing in the collection can be played hide play and shuffle buttons
-    if (!canPlaySomeItemInCollection(items) || hideFinishedItems) {
+    if (!canPlaySomeItemInCollection(items)) {
         hideAll(page, 'btnPlay', false);
         hideAll(page, 'btnShuffle', false);
     }
 
-    if (haveAnyPlayed) {
-        if (hideFinishedItems) {
-            page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility');
-            page.querySelector('#btnFilterPlayedIcon').classList.add('visibility_off');
-            hideAll(page, 'itemMiscInfo');
-        } else {
-            page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility_off');
-            page.querySelector('#btnFilterPlayedIcon').classList.add('visibility');
-            hideAll(page, 'itemMiscInfo', true);
-        }
-
-        hideAll(page, 'btnFilterPlayed', true);
+    const shouldVisible = hideFinishedItems || (!haveAnyNotPlayed && haveAnyPlayed);
+    hideAll(page, 'btnFilterPlayed', shouldVisible);
+    if (hideFinishedItems) {
+        page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility');
+        page.querySelector('#btnFilterPlayedIcon').classList.add('visibility_off');
     } else {
-        hideAll(page, 'btnFilterPlayed');
+        page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility_off');
+        page.querySelector('#btnFilterPlayedIcon').classList.add('visibility');
     }
+
+    hideAll(page, 'itemMiscInfo');
 
     // HACK: Call autoFocuser again because btnPlay may be hidden, but focused by reloadFromItem
     // FIXME: Sometimes focus does not move until all (?) sections are loaded
@@ -1794,6 +1813,9 @@ function renderCollectionItemType(page, parentItem, type, items) {
     html += '<div class="sectionTitleContainer sectionTitleContainer-cards padded-left">';
     html += '<h2 class="sectionTitle sectionTitle-cards">';
     html += '<span>' + type.name + '</span>';
+    if (items && items.length > 0) {
+        html += '<span> (' + items.length + ')</span>';
+    }
     html += '</h2>';
     html += '</div>';
     html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left padded-right">';
@@ -1973,7 +1995,7 @@ export default function (view, params) {
 
         Promise.all([getPromise(apiClient, pageParams), apiClient.getCurrentUser()]).then(([item, user]) => {
             currentItem = item;
-            reloadFromItem(instance, page, pageParams, item, user, hideFinishedItems);
+            reloadFromItem(instance, page, pageParams, item, user);
         }).catch((error) => {
             console.error('failed to get item or current user: ', error);
         });
@@ -2004,8 +2026,17 @@ export default function (view, params) {
 
     function playItem(item, startPosition) {
         const playOptions = getPlayOptions(startPosition);
-        playOptions.items = [item];
-        playbackManager.play(playOptions);
+        const hidePlayed = getHideFinishedItems(item);
+        if (item.Type == 'BoxSet' && hidePlayed) {
+            playbackManager.translateItemsForPlayback([item], playOptions).then(items => {
+                const filteredItems = filterPlayedItems(items);
+                playOptions.items = filteredItems;
+                playbackManager.play(playOptions);
+            });
+        } else {
+            playOptions.items = [item];
+            playbackManager.play(playOptions);
+        }
     }
 
     function playTrailer() {
@@ -2045,7 +2076,19 @@ export default function (view, params) {
     }
 
     function onShuffleClick() {
-        playbackManager.shuffle(currentItem);
+        const playbackOptions = {
+            shuffle: true
+        };
+        const hidePlayed = getHideFinishedItems(currentItem);
+        if (currentItem.Type == 'BoxSet' && hidePlayed) {
+            playbackManager.translateItemsForPlayback([currentItem], playbackOptions).then(items => {
+                const filteredItems = filterPlayedItems(items);
+                playbackOptions.items = filteredItems;
+                playbackManager.play(playbackOptions);
+            });
+        } else {
+            playbackManager.shuffle(currentItem);
+        }
     }
 
     function onCancelSeriesTimerClick() {
@@ -2065,7 +2108,8 @@ export default function (view, params) {
     }
 
     function onFilterPlayedClick() {
-        hideFinishedItems = !hideFinishedItems;
+        const newState = getHideFinishedItems(currentItem);
+        localStorage.setItem('aeliux_hidePlayedItems', !newState);
         reload(self, view, params);
     }
 
@@ -2139,7 +2183,6 @@ export default function (view, params) {
     }
 
     let currentItem;
-    let hideFinishedItems = false;
     const self = this;
 
     function init() {
