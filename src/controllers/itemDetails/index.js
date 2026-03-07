@@ -88,6 +88,23 @@ function getPromise(apiClient, params) {
     throw new Error('Invalid request');
 }
 
+function getHideFinishedItems(item) {
+    const storedHideFinishedItems = localStorage.getItem('aeliux_hidePlayedItems');
+
+    if (item && item.Type != 'BoxSet') {
+        return false;
+    }
+
+    if (storedHideFinishedItems) {
+        const lowered = storedHideFinishedItems.toLowerCase();
+        if (lowered == 'true') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function hideAll(page, className, show) {
     for (const elem of page.querySelectorAll('.' + className)) {
         if (show) {
@@ -555,7 +572,7 @@ function renderHeaderBackdrop(page, item, apiClient) {
     return hasbackdrop;
 }
 
-function reloadFromItem(instance, page, params, item, user, hideFinishedItems) {
+function reloadFromItem(instance, page, params, item, user) {
     const apiClient = ServerConnections.getApiClient(item.ServerId);
 
     libraryMenu.setTitle('');
@@ -579,7 +596,7 @@ function reloadFromItem(instance, page, params, item, user, hideFinishedItems) {
 
     renderSeriesTimerEditor(page, item, apiClient, user);
     renderTimerEditor(page, item, apiClient, user);
-    setInitialCollapsibleState(page, item, apiClient, params.context, user, hideFinishedItems);
+    setInitialCollapsibleState(page, item, apiClient, params.context, user);
     const canPlay = reloadPlayButtons(page, item);
 
     setTrailerButtonVisibility(page, item);
@@ -820,7 +837,7 @@ function renderNextUp(page, item, user) {
     });
 }
 
-function setInitialCollapsibleState(page, item, apiClient, context, user, hideFinishedItems = true) {
+function setInitialCollapsibleState(page, item, apiClient, context, user) {
     page.querySelector('.collectionItems').innerHTML = '';
 
     if (item.Type == 'Playlist') {
@@ -837,7 +854,7 @@ function setInitialCollapsibleState(page, item, apiClient, context, user, hideFi
             page.querySelector('#childrenCollapsible').classList.add('hide');
         }
 
-        renderChildren(page, item, hideFinishedItems);
+        renderChildren(page, item);
     } else {
         page.querySelector('#listChildrenCollapsible').classList.add('hide');
         page.querySelector('#childrenCollapsible').classList.add('hide');
@@ -1362,7 +1379,7 @@ function renderTags(page, item) {
     }
 }
 
-function renderChildren(page, item, hideFinishedItems) {
+function renderChildren(page, item) {
     const childrenCollapsible = page.querySelector(LIST_VIEW_TYPES.includes(item.Type) ? '#listChildrenCollapsible' : '#childrenCollapsible');
     const childrenItemsContainer = childrenCollapsible.querySelector('.itemsContainer');
 
@@ -1525,7 +1542,7 @@ function renderChildren(page, item, hideFinishedItems) {
                 name: globalize.translate('Collections'),
                 type: 'BoxSet'
             }];
-            renderCollectionItems(page, item, collectionItemTypes, result.Items, hideFinishedItems);
+            renderCollectionItems(page, item, collectionItemTypes, result.Items);
         }
     });
 
@@ -1708,9 +1725,11 @@ function canPlaySomeItemInCollection(items) {
     return false;
 }
 
-function renderCollectionItems(page, parentItem, types, items, hideFinishedItems) {
+function renderCollectionItems(page, parentItem, types, items) {
     page.querySelector('.collectionItems').classList.remove('hide');
     page.querySelector('.collectionItems').innerHTML = '';
+
+    const hideFinishedItems = getHideFinishedItems(parentItem);
 
     const finalItems = [];
     let haveAnyPlayed = false;
@@ -1754,7 +1773,7 @@ function renderCollectionItems(page, parentItem, types, items, hideFinishedItems
     const containers = page.querySelectorAll('.collectionItemsContainer');
 
     const notifyRefreshNeeded = function () {
-        renderChildren(page, parentItem, hideFinishedItems);
+        renderChildren(page, parentItem);
     };
 
     for (const container of containers) {
@@ -1973,7 +1992,7 @@ export default function (view, params) {
 
         Promise.all([getPromise(apiClient, pageParams), apiClient.getCurrentUser()]).then(([item, user]) => {
             currentItem = item;
-            reloadFromItem(instance, page, pageParams, item, user, hideFinishedItems);
+            reloadFromItem(instance, page, pageParams, item, user);
         }).catch((error) => {
             console.error('failed to get item or current user: ', error);
         });
@@ -2065,7 +2084,8 @@ export default function (view, params) {
     }
 
     function onFilterPlayedClick() {
-        hideFinishedItems = !hideFinishedItems;
+        const newState = getHideFinishedItems(currentItem);
+        localStorage.setItem('aeliux_hidePlayedItems', !newState);
         reload(self, view, params);
     }
 
@@ -2139,7 +2159,6 @@ export default function (view, params) {
     }
 
     let currentItem;
-    let hideFinishedItems = false;
     const self = this;
 
     function init() {
