@@ -32,7 +32,7 @@ import dom from 'utils/dom';
 import { download } from 'scripts/fileDownloader';
 import libraryMenu from 'scripts/libraryMenu';
 import * as userSettings from 'scripts/settings/userSettings';
-import { getPortraitShape, getSquareShape } from 'utils/card';
+import { getPortraitShape, getSquareShape, getBackdropShape } from 'utils/card';
 import Dashboard from 'utils/dashboard';
 import Events from 'utils/events';
 import { getItemBackdropImageUrl } from 'utils/jellyfin-apiclient/backdropImage';
@@ -1766,7 +1766,7 @@ function renderCollectionItemType(page, parentItem, type, items) {
     html += '</h2>';
     html += '</div>';
     html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left padded-right">';
-    const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : getPortraitShape(false);
+    const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : type.type == 'Movie' ? getBackdropShape(false) : getPortraitShape(false);
     html += cardBuilder.getCardsHtml({
         items: items,
         shape: shape,
