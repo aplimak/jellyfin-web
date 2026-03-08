@@ -1077,7 +1077,7 @@ function renderMiscInfo(page, item) {
             subtitles: false
         });
 
-        if (miscInfo.innerHTML && item.Type !== 'SeriesTimer') {
+        if (miscInfo.innerHTML && item.Type !== 'SeriesTimer' && item.Type !== 'BoxSet') {
             miscInfo.classList.remove('hide');
         } else {
             miscInfo.classList.add('hide');
@@ -1799,8 +1799,6 @@ function renderCollectionItems(page, parentItem, types, items) {
         page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility_off');
         page.querySelector('#btnFilterPlayedIcon').classList.add('visibility');
     }
-
-    hideAll(page, 'itemMiscInfo');
 
     // HACK: Call autoFocuser again because btnPlay may be hidden, but focused by reloadFromItem
     // FIXME: Sometimes focus does not move until all (?) sections are loaded
