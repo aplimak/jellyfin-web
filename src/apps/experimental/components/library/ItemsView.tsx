@@ -229,7 +229,7 @@ const ItemsView: FC<ItemsViewProps> = ({
     const hasSortName = libraryViewSettings.SortBy !== ItemSortBy.Random;
 
     const itemsContainerClass = classNames(
-        'padded-left padded-right',
+        'padded-left',
         libraryViewSettings.ViewMode === ViewMode.ListView ?
             'vertical-list' :
             'vertical-wrap'
