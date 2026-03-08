@@ -2024,15 +2024,26 @@ export default function (view, params) {
 
     function playItem(item, startPosition) {
         const playOptions = getPlayOptions(startPosition);
+        playOptions.items = [item];
         const hidePlayed = getHideFinishedItems(item);
-        if (item.Type == 'BoxSet' && hidePlayed) {
+        if (item.Type == 'BoxSet') {
             playbackManager.translateItemsForPlayback([item], playOptions).then(items => {
-                const filteredItems = filterPlayedItems(items);
-                playOptions.items = filteredItems;
+                if (hidePlayed) {
+                    const filteredItems = filterPlayedItems(items);
+                    if (filteredItems && filteredItems.length > 0) {
+                        playOptions.items = filteredItems;
+                    }
+                } else {
+                    playOptions.items = items;
+                }
+
+                if (playOptions.items[0].UserData && playOptions.items[0].UserData.PlaybackPositionTicks) {
+                    playOptions.startPositionTicks = playOptions.items[0].UserData.PlaybackPositionTicks;
+                }
+
                 playbackManager.play(playOptions);
             });
         } else {
-            playOptions.items = [item];
             playbackManager.play(playOptions);
         }
     }
@@ -2075,13 +2086,16 @@ export default function (view, params) {
 
     function onShuffleClick() {
         const playbackOptions = {
-            shuffle: true
+            shuffle: true,
+            items: [currentItem]
         };
         const hidePlayed = getHideFinishedItems(currentItem);
         if (currentItem.Type == 'BoxSet' && hidePlayed) {
             playbackManager.translateItemsForPlayback([currentItem], playbackOptions).then(items => {
                 const filteredItems = filterPlayedItems(items);
-                playbackOptions.items = filteredItems;
+                if (filteredItems && filteredItems.length > 0) {
+                    playbackOptions.items = filteredItems;
+                }
                 playbackManager.play(playbackOptions);
             });
         } else {
