@@ -1816,7 +1816,7 @@ function renderCollectionItemType(page, parentItem, type, items) {
     }
     html += '</h2>';
     html += '</div>';
-    html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left padded-right">';
+    html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left">';
     const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : type.type == 'Movie' ? getBackdropShape(false) : getPortraitShape(false);
 
     html += cardBuilder.getCardsHtml({
