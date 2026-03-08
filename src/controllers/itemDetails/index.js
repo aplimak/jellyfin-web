@@ -380,6 +380,12 @@ function reloadPlayButtons(page, item) {
                 btnPlay.title = globalize.translate('Play');
             }
         }
+        const playTitle = page.querySelector('#btnPlayTitle');
+        if (isResumable) {
+            playTitle.innerHTML = globalize.translate('ButtonResume');
+        } else {
+            playTitle.innerHTML = globalize.translate('Play');
+        }
     } else {
         hideAll(page, 'btnPlay');
         hideAll(page, 'btnReplay');
