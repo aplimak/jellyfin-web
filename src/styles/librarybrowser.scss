@@ -1037,16 +1037,6 @@ div.itemDetailGalleryLink.defaultCardBackground {
     padding: 0.7em 0.7em !important;
 }
 
-.detailButton.btnPlay {
-    background-color: #333333;
-    border: none;
-    border-radius: 8px;
-}
-
-.detailButton.btnPlay:hover {
-    background-color: #00a4dc22;
-}
-
 @media all and (min-width: 29em) {
     .detailButton {
         padding-left: 0.75em !important;
@@ -1070,7 +1060,7 @@ div.itemDetailGalleryLink.defaultCardBackground {
 
 .detailButton-content {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -1088,6 +1078,7 @@ div.itemDetailGalleryLink.defaultCardBackground {
 }
 
 .detailButton-text {
+    margin-top: 0.7em;
     font-size: 80%;
     font-weight: 400;
 }
