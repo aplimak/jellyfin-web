@@ -191,12 +191,18 @@ export function show(options: Options) {
     let renderIcon = false;
     const icons = [];
     let itemIcon;
+    let actualItemsCount = 0;
     for (const item of options.items) {
         itemIcon = item.icon || (item.selected ? 'check' : null);
 
         if (itemIcon) {
             renderIcon = true;
         }
+
+        if (!item.divider) {
+            actualItemsCount++;
+        }
+
         icons.push(itemIcon || '');
     }
 
@@ -248,17 +254,19 @@ export function show(options: Options) {
 
     // To prevent repeated empty sections
     let lastItemWasDivider = true;
+    let actualItemsShown = 0;
 
     // 'options.items' is HTMLOptionsCollection, so no fancy loops
     for (let i = 0; i < options.items.length; i++) {
         const item = options.items[i];
-        const lastItem = i == options.items.length - 1;
+        const lastItem = i == options.items.length - 1 || actualItemsShown >= actualItemsCount;
 
         if (item.divider) {
             if (!lastItemWasDivider && !lastItem) html += '<div class="actionsheetDivider"></div>';
             lastItemWasDivider = true;
             continue;
         }
+        actualItemsShown++;
         lastItemWasDivider = false;
 
         const autoFocus = item.selected && layoutManager.tv ? ' autoFocus' : '';
