@@ -1827,13 +1827,33 @@ function renderCollectionItems(page, parentItem, types, items) {
 function renderCollectionItemType(page, parentItem, type, items) {
     let html = '';
     html += '<div class="verticalSection">';
-    html += '<div class="sectionTitleContainer sectionTitleContainer-cards padded-left">';
+    html += '<div class="sectionTitleContainer sectionTitleContainer-cards padded-left padded-right" style="display: flex; justify-content: space-between; align-items: center;">';
     html += '<h2 class="sectionTitle sectionTitle-cards">';
     html += '<span>' + type.name + '</span>';
-    if (items && items.length > 0) {
+    if (type.type == 'Movie' && items && items.length > 0) {
         html += '<span> (' + items.length + ')</span>';
+        html += '</h2>';
+        let collectionRuntime = 0;
+        let i = 0;
+        for (const item of items) {
+            collectionRuntime += item.RunTimeTicks;
+            if (i == 0 && item.UserData && item.UserData.PlaybackPositionTicks) {
+                collectionRuntime -= item.UserData.PlaybackPositionTicks;
+            }
+            i++;
+        }
+        if (collectionRuntime > 0) {
+            let marginRight = 0;
+            if (layoutManager.mobile) {
+                marginRight += 0.3;
+            }
+            html += '<h3 class="sectionTitle sectionTitle-cards">';
+            html += `<span style="margin-right: ${marginRight}em">${datetime.getDisplayDuration(collectionRuntime)}</span>`;
+            html += '</h3>';
+        }
+    } else {
+        html += '</h2>';
     }
-    html += '</h2>';
     html += '</div>';
     html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left">';
     const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : type.type == 'Movie' ? getBackdropShape(false) : getPortraitShape(false);
@@ -1842,10 +1862,11 @@ function renderCollectionItemType(page, parentItem, type, items) {
         items: items,
         shape: shape,
         showTitle: true,
-        showYear: type.mediaType === 'Video' || type.type === 'Series' || type.type === 'Movie',
+        showYear: type.type === 'Series',
         centerText: true,
         lazy: true,
         showDetailsMenu: true,
+        showRuntime: type.type == 'Movie',
         overlayMoreButton: true,
         showAddToCollection: false,
         showRemoveFromCollection: true,
