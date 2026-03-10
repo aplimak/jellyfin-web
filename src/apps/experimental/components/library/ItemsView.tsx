@@ -143,6 +143,7 @@ const ItemsView: FC<ItemsViewProps> = ({
             shape: shape,
             showTitle: libraryViewSettings.ShowTitle,
             showYear: libraryViewSettings.ShowYear,
+            showRuntime: libraryViewSettings.ShowTime,
             cardLayout: libraryViewSettings.CardLayout,
             centerText: true,
             context: collectionType,
@@ -189,6 +190,7 @@ const ItemsView: FC<ItemsViewProps> = ({
         libraryViewSettings.ShowTitle,
         libraryViewSettings.ImageType,
         libraryViewSettings.ShowYear,
+        libraryViewSettings.ShowTime,
         libraryViewSettings.CardLayout,
         collectionType,
         viewType

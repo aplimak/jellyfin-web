@@ -205,6 +205,18 @@ const ViewSettingsButton: FC<ViewSettingsButtonProps> = ({
                                             label={globalize.translate('ShowYear')}
                                         />
                                     )}
+                                    {isImageTypeVisible && (
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={libraryViewSettings.ShowTime}
+                                                    onChange={handleChange}
+                                                    name='ShowTime'
+                                                />
+                                            }
+                                            label='Show Runtime'
+                                        />
+                                    )}
                                     <FormControlLabel
                                         control={
                                             <Checkbox
