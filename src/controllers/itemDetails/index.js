@@ -1827,8 +1827,20 @@ function renderCollectionItemType(page, parentItem, type, items) {
     html += '<div class="sectionTitleContainer sectionTitleContainer-cards padded-left">';
     html += '<h2 class="sectionTitle sectionTitle-cards">';
     html += '<span>' + type.name + '</span>';
-    if (items && items.length > 0) {
-        html += '<span> (' + items.length + ')</span>';
+    if (type.type == 'Movie' && items && items.length > 0) {
+        html += '<span>: ' + items.length + '</span>';
+        let collectionRuntime = 0;
+        let i = 0;
+        for (const item of items) {
+            collectionRuntime += item.RunTimeTicks;
+            if (i == 0 && item.UserData && item.UserData.PlaybackPositionTicks) {
+                collectionRuntime -= item.UserData.PlaybackPositionTicks;
+            }
+            i++;
+        }
+        if (collectionRuntime > 0) {
+            html += '<span> - ' + datetime.getDisplayRunningTime(collectionRuntime) + '</span>';
+        }
     }
     html += '</h2>';
     html += '</div>';
@@ -1839,10 +1851,11 @@ function renderCollectionItemType(page, parentItem, type, items) {
         items: items,
         shape: shape,
         showTitle: true,
-        showYear: type.mediaType === 'Video' || type.type === 'Series' || type.type === 'Movie',
+        showYear: type.type === 'Series',
         centerText: true,
         lazy: true,
         showDetailsMenu: true,
+        showRuntime: type.type == 'Movie',
         overlayMoreButton: true,
         showAddToCollection: false,
         showRemoveFromCollection: true,
