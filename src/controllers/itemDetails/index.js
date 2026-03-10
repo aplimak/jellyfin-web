@@ -933,13 +933,16 @@ function renderOverview(page, item) {
                 overviewElemnt.classList.add('detail-clamp-text');
 
                 // Grab the sibling element to control the expand state
+                const expandButtonParent = overviewElemnt.parentElement.querySelector('.overview-controls');
                 const expandButton = overviewElemnt.parentElement.querySelector('.overview-expand');
 
                 // Detect if we have overflow of text. Based on this StackOverflow answer
                 // https://stackoverflow.com/a/35157976
                 if (Math.abs(overviewElemnt.scrollHeight - overviewElemnt.offsetHeight) > 2) {
+                    expandButtonParent.classList.remove('hide');
                     expandButton.classList.remove('hide');
                 } else {
+                    expandButtonParent.classList.add('hide');
                     expandButton.classList.add('hide');
                 }
 
@@ -981,8 +984,10 @@ function renderGenres(page, item, context = inferContext(item)) {
     const genresGroup = page.querySelector('.genresGroup');
     if (genres.length) {
         genresGroup.classList.remove('hide');
+        return true;
     } else {
         genresGroup.classList.add('hide');
+        return false;
     }
 }
 
@@ -1010,8 +1015,10 @@ function renderWriter(page, item, context) {
     const writersGroup = page.querySelector('.writersGroup');
     if (writers.length) {
         writersGroup.classList.remove('hide');
+        return true;
     } else {
         writersGroup.classList.add('hide');
+        return false;
     }
 }
 
@@ -1039,8 +1046,10 @@ function renderDirector(page, item, context) {
     const directorsGroup = page.querySelector('.directorsGroup');
     if (directors.length) {
         directorsGroup.classList.remove('hide');
+        return true;
     } else {
         directorsGroup.classList.add('hide');
+        return false;
     }
 }
 
@@ -1068,6 +1077,7 @@ function renderStudio(page, item, context) {
 
     const studiosGroup = page.querySelector('.studiosGroup');
     studiosGroup.classList.toggle('hide', !studios.length);
+    return studios.length;
 }
 
 function renderMiscInfo(page, item) {
@@ -1117,10 +1127,16 @@ function renderDetails(page, item, apiClient, context) {
     renderSimilarItems(page, item, context);
     renderMoreFromSeason(page, item, apiClient);
     renderMoreFromArtist(page, item, apiClient);
-    renderDirector(page, item, context);
-    renderStudio(page, item, context);
-    renderWriter(page, item, context);
-    renderGenres(page, item, context);
+
+    const director = renderDirector(page, item, context);
+    const studio = renderStudio(page, item, context);
+    const writer = renderWriter(page, item, context);
+    const genre = renderGenres(page, item, context);
+
+    if (!director && !studio && !writer && !genre) {
+        page.querySelector('.itemDetailsGroup').classList.add('hide');
+    }
+
     renderChannelGuide(page, apiClient, item);
     renderTagline(page, item);
     renderOverview(page, item);
