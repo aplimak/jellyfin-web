@@ -1827,7 +1827,7 @@ function renderCollectionItemType(page, parentItem, type, items) {
     html += '<h2 class="sectionTitle sectionTitle-cards">';
     html += '<span>' + type.name + '</span>';
     if (type.type == 'Movie' && items && items.length > 0) {
-        html += '<span> (' + items.length + ')</span>';
+        html += '<span>: ' + items.length + '</span>';
         html += '</h2>';
         let collectionRuntime = 0;
         let i = 0;
