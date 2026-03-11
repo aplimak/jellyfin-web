@@ -1758,9 +1758,10 @@ function renderCollectionItems(page, parentItem, types, items) {
     page.querySelector('.collectionItems').innerHTML = '';
 
     const filteredItems = filterPlayedItems(items);
-    const haveAnyPlayed = filteredItems.length < items.length;
-    const haveAnyNotPlayed = filteredItems.length == 0;
-    const hideFinishedItems = !haveAnyNotPlayed && getHideFinishedItems(parentItem);
+    const effectiveFilter = filteredItems.length > 0 && filteredItems.length < items.length;
+    hideAll(page, 'btnFilterPlayed', effectiveFilter);
+
+    const hideFinishedItems = effectiveFilter && getHideFinishedItems(parentItem);
 
     if (hideFinishedItems) {
         items = filteredItems;
@@ -1806,8 +1807,6 @@ function renderCollectionItems(page, parentItem, types, items) {
         hideAll(page, 'btnShuffle', false);
     }
 
-    const shouldVisible = hideFinishedItems || (!haveAnyNotPlayed && haveAnyPlayed);
-    hideAll(page, 'btnFilterPlayed', shouldVisible);
     if (hideFinishedItems) {
         page.querySelector('#btnFilterPlayedIcon').classList.remove('visibility');
         page.querySelector('#btnFilterPlayedIcon').classList.add('visibility_off');
