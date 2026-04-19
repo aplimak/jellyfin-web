@@ -16,7 +16,9 @@ import '../../../components/cardbuilder/card.scss';
 import '../../../elements/emby-checkbox/emby-checkbox';
 import Dashboard from '../../../utils/dashboard';
 import toast from '../../../components/toast/toast';
-import { getDefaultBackgroundClass } from '../../../components/cardbuilder/cardBuilderUtils';
+import dialogHelper from '../../../components/dialogHelper/dialogHelper';
+import baseAlert from '../../../components/alert';
+import { getDefaultBackgroundClass } from '../../../components/cardbuilder/utils/builder';
 
 import appIcon from '@jellyfin/ux-web/icon-transparent.png';
 
