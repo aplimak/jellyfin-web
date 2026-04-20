@@ -16,7 +16,7 @@
   ],
   "menuLinks": [],
   "servers": [
-    "http://192.168.1.2/jellyfin"
+    "https://jf.ring.home"
   ],
   "plugins": [
     "playAccessValidation/plugin",
