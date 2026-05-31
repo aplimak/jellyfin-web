@@ -6,6 +6,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Menu from '@mui/material/Menu/Menu';
 import MenuItem from '@mui/material/MenuItem/MenuItem';
+import Typography from '@mui/material/Typography';
 import React, { FC, useCallback, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
@@ -42,31 +43,19 @@ const LibraryViewMenu: FC<LibraryViewMenuProps> = ({ isCompact = false }) => {
 
     return (
         <>
-            {isCompact ? (
-                <Tooltip title={globalize.translate(currentTab.label)}>
-                    <IconButton
-                        size='large'
-                        color='inherit'
-                        aria-controls={LIBRARY_VIEW_MENU_ID}
-                        aria-haspopup='true'
-                        onClick={onMenuButtonClick}
-                    >
-                        <ViewList />
-                    </IconButton>
-                </Tooltip>
-            ) : (
-                <Button
-                    variant='text'
-                    size='large'
-                    color='inherit'
-                    endIcon={<ArrowDropDown />}
-                    aria-controls={LIBRARY_VIEW_MENU_ID}
-                    aria-haspopup='true'
-                    onClick={onMenuButtonClick}
-                >
+            <Button
+                variant='text'
+                size='large'
+                color='inherit'
+                endIcon={<ArrowDropDown />}
+                aria-controls={LIBRARY_VIEW_MENU_ID}
+                aria-haspopup='true'
+                onClick={onMenuButtonClick}
+            >
+                <Typography variant='h2' component='span'>
                     {globalize.translate(currentTab.label)}
-                </Button>
-            )}
+                </Typography>
+            </Button>
 
             <Menu
                 anchorEl={menuAnchorEl}

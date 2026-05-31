@@ -44,24 +44,60 @@ export const LibraryRoutes: LibraryRoute[] = [
         views: [
             {
                 index: 0,
-                label: 'Books',
-                view: LibraryTab.Books,
+                label: 'Folders',
+                view: LibraryTab.Folders,
                 isDefault: true
             },
             {
                 index: 1,
+                label: 'Books',
+                view: LibraryTab.Books
+            },
+            {
+                index: 2,
+                label: 'Authors',
+                view: LibraryTab.Authors
+            },
+            {
+                index: 3,
                 label: 'Suggestions',
                 view: LibraryTab.Suggestions
+            },
+            {
+                index: 4,
+                label: 'Genres',
+                view: LibraryTab.Genres
+            },
+            {
+                index: 5,
+                label: 'Collections',
+                view: LibraryTab.Collections
+            },
+            {
+                index: 6,
+                label: 'Favorites',
+                view: LibraryTab.Favorites
+            }
+        ]
+    },
+    {
+        path: '/boxsets',
+        views: [
+            {
+                index: 0,
+                label: 'Collections',
+                view: LibraryTab.Collections,
+                isDefault: true
+            },
+            {
+                index: 1,
+                label: 'Favorites',
+                view: LibraryTab.Favorites
             },
             {
                 index: 2,
                 label: 'Genres',
                 view: LibraryTab.Genres
-            },
-            {
-                index: 3,
-                label: 'Favorites',
-                view: LibraryTab.Favorites
             }
         ]
     },
@@ -93,6 +129,11 @@ export const LibraryRoutes: LibraryRoute[] = [
                 index: 4,
                 label: 'Genres',
                 view: LibraryTab.Genres
+            },
+            {
+                index: 5,
+                label: 'Playlists',
+                view: LibraryTab.Playlists
             }
         ]
     },
@@ -134,6 +175,11 @@ export const LibraryRoutes: LibraryRoute[] = [
                 index: 6,
                 label: 'Genres',
                 view: LibraryTab.Genres
+            },
+            {
+                index: 7,
+                label: 'Collections',
+                view: LibraryTab.Collections
             }
         ]
     },
@@ -170,6 +216,16 @@ export const LibraryRoutes: LibraryRoute[] = [
                 index: 5,
                 label: 'Episodes',
                 view: LibraryTab.Episodes
+            },
+            {
+                index: 6,
+                label: 'Collections',
+                view: LibraryTab.Collections
+            },
+            {
+                index: 7,
+                label: 'Playlists',
+                view: LibraryTab.Playlists
             }
         ]
     },
@@ -204,8 +260,8 @@ export const LibraryRoutes: LibraryRoute[] = [
         views: [
             {
                 index: 0,
-                label: 'HeaderVideos',
-                view: LibraryTab.MusicVideos,
+                label: 'Folders',
+                view: LibraryTab.Folders,
                 isDefault: true
             },
             {
@@ -215,8 +271,60 @@ export const LibraryRoutes: LibraryRoute[] = [
             },
             {
                 index: 2,
+                label: 'HeaderVideos',
+                view: LibraryTab.MusicVideos
+            },
+            {
+                index: 3,
+                label: 'Playlists',
+                view: LibraryTab.Playlists
+            }
+        ]
+    },
+    {
+        path: '/playlists',
+        views: [
+            {
+                index: 0,
+                label: 'Playlists',
+                view: LibraryTab.Playlists,
+                isDefault: true
+            },
+            {
+                index: 1,
+                label: 'Favorites',
+                view: LibraryTab.Favorites
+            }
+        ]
+    },
+    {
+        path: '/mixed',
+        views: [
+            {
+                index: 0,
                 label: 'Folders',
-                view: LibraryTab.Folders
+                view: LibraryTab.Folders,
+                isDefault: true
+            },
+            {
+                index: 1,
+                label: 'Suggestions',
+                view: LibraryTab.Suggestions
+            },
+            {
+                index: 2,
+                label: 'HeaderMedia',
+                view: LibraryTab.Mixed
+            },
+            {
+                index: 3,
+                label: 'Collections',
+                view: LibraryTab.Collections
+            },
+            {
+                index: 4,
+                label: 'Playlists',
+                view: LibraryTab.Playlists
             }
         ]
     }

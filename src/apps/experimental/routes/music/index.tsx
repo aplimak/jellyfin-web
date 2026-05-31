@@ -62,6 +62,14 @@ const genresTabContent: LibraryTabContent = {
     isAlphabetPickerEnabled: false
 };
 
+const collectionsTabContent: LibraryTabContent = {
+    viewType: LibraryTab.Collections,
+    collectionType: CollectionType.Music,
+    isBtnNewCollectionEnabled: true,
+    itemType: [BaseItemKind.BoxSet],
+    noItemsMessage: 'MessageNoCollectionsAvailable'
+};
+
 const musicTabMapping: LibraryTabMapping = {
     0: albumsTabContent,
     1: suggestionsTabContent,
@@ -69,7 +77,8 @@ const musicTabMapping: LibraryTabMapping = {
     3: artistsTabContent,
     4: playlistsTabContent,
     5: songsTabContent,
-    6: genresTabContent
+    6: genresTabContent,
+    7: collectionsTabContent
 };
 
 const Music: FC = () => {
@@ -85,10 +94,7 @@ const Music: FC = () => {
             <PageTabContent
                 key={`${currentTab.viewType} - ${libraryId}`}
                 currentTab={currentTab}
-                parentId={
-                    // Playlists exist outside of the scope of the library
-                    currentTab.viewType === LibraryTab.Playlists ? undefined : libraryId
-                }
+                parentId={libraryId}
             />
         </Page>
     );
