@@ -26,7 +26,7 @@ class LayoutManager {
     get layout() {
         if (this.tv) return LayoutMode.Tv;
         if (this.experimental) return LayoutMode.Experimental;
-        if (this.mobile) return LayoutMode.Mobile;
+        if (this.mobile) return LayoutMode.Experimental;
         if (this.desktop) return LayoutMode.Desktop;
         return LayoutMode.Experimental;
     }
