@@ -74,9 +74,6 @@ export const Component: FC = () => {
                             isDrawerAvailable={!isMediumScreen && isDrawerAvailable}
                             isDrawerOpen={isDrawerOpen}
                             onDrawerButtonClick={onToggleDrawer}
-                            buttons={
-                                <HelpButton />
-                            }
                         >
                             {isMetadataManager && (
                                 <ServerButton />
