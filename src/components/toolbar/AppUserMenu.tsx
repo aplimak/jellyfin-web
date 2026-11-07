@@ -24,6 +24,8 @@ import globalize from 'lib/globalize';
 import shell from 'scripts/shell';
 import Dashboard from 'utils/dashboard';
 
+import Code from '@mui/icons-material/Code';
+
 export const ID = 'app-user-menu';
 
 interface AppUserMenuProps extends MenuProps {
@@ -161,6 +163,19 @@ const AppUserMenu: FC<AppUserMenuProps> = ({
                     <ListItemText primary={globalize.translate('MetadataManager')} />
                 </MenuItem>
             ])}
+
+            <Divider />
+            <MenuItem
+                key='scripts-link'
+                component={Link}
+                to='/scripts'
+                onClick={onMenuClose}
+            >
+                <ListItemIcon>
+                    <Code />
+                </ListItemIcon>
+                <ListItemText primary='Scripts' />
+            </MenuItem>
 
             <Divider />
             {isQuickConnectEnabled && (
