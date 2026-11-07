@@ -237,6 +237,19 @@ const ViewSettingsButton: FC<ViewSettingsButtonProps> = ({
                                     control={
                                         <Switch
                                             size='small'
+                                            checked={libraryViewSettings.ShowTime}
+                                            onChange={handleChange}
+                                            name='ShowTime'
+                                        />
+                                    }
+                                    label='Show Runtime'
+                                />
+                            </MenuItem>
+                            <MenuItem>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            size='small'
                                             checked={libraryViewSettings.CardLayout}
                                             onChange={handleChange}
                                             name='CardLayout'

@@ -63,6 +63,7 @@ export interface LibraryViewSettings {
     ViewMode: ViewMode;
     ShowTitle: boolean;
     ShowYear?: boolean;
+    ShowTime?: boolean;
     Filters?: Filters;
     Alphabet?: string | null;
 }
