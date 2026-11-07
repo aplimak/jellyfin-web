@@ -565,6 +565,9 @@ function reloadFromItem(instance, page, params, item, user) {
 
     // Render the mobile header backdrop
     if (layoutManager.mobile) {
+        if (item.Type == 'BoxSet') {
+            hideAll(page, 'infoWrapper', false);
+        }
         renderHeaderBackdrop(page, item, apiClient);
     }
 

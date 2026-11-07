@@ -709,7 +709,7 @@
 }
 
 .layout-mobile .mainDetailButtons {
-    margin-top: 1em;
+    margin-top: 0.5em;
     margin-bottom: 0.5em;
 }
 
@@ -721,6 +721,7 @@
     // The buttons row is full width on small screens
     @media all and (max-width: 32em) {
         margin-bottom: 0;
+        margin-top: 0;
         padding-left: 0;
     }
 }
@@ -732,6 +733,7 @@
 
     @media all and (max-width: 32em) {
         margin-bottom: 0;
+        margin-top: 0;
         padding-right: 0;
     }
 }
