@@ -47,21 +47,24 @@ const Pagination: FC<PaginationProps> = ({
             variant='text'
             size={isSmallScreen ? undefined : 'small'}
         >
-            <Button
+            {!disabled && ([<Button
+                key='paginator-prev'
                 title={globalize.translate('Previous')}
                 disabled={disabled || index == 0}
                 onClick={onPreviousPageClick}
             >
                 <NavigateBeforeIcon />
-            </Button>
+            </Button>,
 
             <Button
+                key='paginator-next'
                 title={globalize.translate('Next')}
                 disabled={disabled || index + pageSize >= total}
                 onClick={onNextPageClick}
             >
                 <NavigateNextIcon />
-            </Button>
+            </Button>])}
+
         </ButtonGroup>
     );
 };
