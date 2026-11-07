@@ -41,6 +41,7 @@ import Dashboard from 'utils/dashboard';
 import Events from 'utils/events';
 import { getItemBackdropImageUrl } from 'utils/jellyfin-apiclient/backdropImage';
 import { OutboundWebSocketMessageType } from '@jellyfin/sdk/lib/websocket';
+import seenFilter from 'components/seenFilter';
 
 import 'elements/emby-itemscontainer/emby-itemscontainer';
 import 'elements/emby-checkbox/emby-checkbox';
@@ -578,6 +579,16 @@ function reloadFromItem(instance, page, params, item, user) {
     renderTimerEditor(page, item, apiClient, user);
     setInitialCollapsibleState(page, item, apiClient, params.context, user);
     const canPlay = reloadPlayButtons(page, item);
+
+    const hasSeenFilter = seenFilter.isEnabled(item);
+    hideAll(page, 'btnSeenFilter', seenFilter.containerSupported(item));
+    if (hasSeenFilter) {
+        page.querySelector('#btnSeenFilterIcon').classList.remove('visibility');
+        page.querySelector('#btnSeenFilterIcon').classList.add('visibility_off');
+    } else {
+        page.querySelector('#btnSeenFilterIcon').classList.remove('visibility_off');
+        page.querySelector('#btnSeenFilterIcon').classList.add('visibility');
+    }
 
     setTrailerButtonVisibility(page, item);
 
@@ -1351,6 +1362,7 @@ function renderTags(page, item) {
 function renderChildren(page, item) {
     const childrenCollapsible = page.querySelector(LIST_VIEW_TYPES.includes(item.Type) ? '#listChildrenCollapsible' : '#childrenCollapsible');
     const childrenItemsContainer = childrenCollapsible.querySelector('.itemsContainer');
+    const hasSeenFilter = seenFilter.isEnabled(item);
 
     let fields = 'ItemCounts,PrimaryImageAspectRatio,CanDelete,MediaSourceCount';
     const query = {
@@ -1386,6 +1398,9 @@ function renderChildren(page, item) {
 
     promise = promise || apiClient.getItems(apiClient.getCurrentUserId(), query);
     promise.then(function (result) {
+        if (hasSeenFilter) {
+            result.Items = seenFilter.filterItems(result.Items);
+        }
         let html = '';
         let scrollX = false;
         let isList = false;
@@ -1973,7 +1988,13 @@ export default function (view, params) {
     function playItem(item, startPosition) {
         const playOptions = getPlayOptions(startPosition);
         playOptions.items = [item];
-        playbackManager.play(playOptions);
+
+        if (!seenFilter.containerSupported(item)) {
+            playbackManager.play(playOptions);
+            return;
+        }
+
+        seenFilter.doPlay(playOptions);
     }
 
     function playTrailer() {
@@ -2013,7 +2034,24 @@ export default function (view, params) {
     }
 
     function onShuffleClick() {
-        playbackManager.shuffle(currentItem);
+        const item = currentItem;
+        const playOptions = {
+            shuffle: true,
+            items: [item]
+        };
+
+        if (!seenFilter.containerSupported(item)) {
+            playbackManager.shuffle(item);
+            return;
+        }
+
+        seenFilter.doPlay(playOptions);
+    }
+
+    function onSeenFilterClick() {
+        const newState = seenFilter.isEnabled(currentItem);
+        seenFilter.setEnabled(!newState);
+        reload(self, view, params);
     }
 
     function onCancelSeriesTimerClick() {
@@ -2116,6 +2154,7 @@ export default function (view, params) {
         bindAll(view, '.btnReplay', 'click', onPlayClick);
         bindAll(view, '.btnInstantMix', 'click', onInstantMixClick);
         bindAll(view, '.btnShuffle', 'click', onShuffleClick);
+        bindAll(view, '.btnSeenFilter', 'click', onSeenFilterClick);
         bindAll(view, '.btnPlayTrailer', 'click', onPlayTrailerClick);
         bindAll(view, '.btnCancelSeriesTimer', 'click', onCancelSeriesTimerClick);
         bindAll(view, '.btnCancelTimer', 'click', onCancelTimerClick);
