@@ -12,7 +12,7 @@ import { appHost } from 'components/apphost';
 import { clearBackdrop, setBackdrops } from 'components/backdrop/backdrop';
 import cardBuilder from 'components/cardbuilder/cardBuilder';
 import { buildCardImage } from 'components/cardbuilder/cardImage';
-import { getPortraitShape, getSquareShape } from 'components/cardbuilder/utils/shape';
+import { getPortraitShape, getSquareShape, getBackdropShape } from 'components/cardbuilder/utils/shape';
 import confirm from 'components/confirm/confirm';
 import imageLoader from 'components/images/imageLoader';
 import itemContextMenu from 'components/itemContextMenu';
@@ -1752,7 +1752,7 @@ function renderCollectionItemType(page, parentItem, type, items) {
     html += '</h2>';
     html += '</div>';
     html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left padded-right">';
-    const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : getPortraitShape(false);
+    const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : type.type == 'Movie' ? getBackdropShape(false) : getPortraitShape(false);
     html += cardBuilder.getCardsHtml({
         items: items,
         shape: shape,

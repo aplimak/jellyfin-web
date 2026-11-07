@@ -71,7 +71,7 @@ function getLatestItemsHtmlFn(
     return function (items: BaseItemDto[]) {
         const cardLayout = false;
         let shape;
-        if (itemType === 'Channel' || viewType === 'movies' || viewType === 'books' || viewType === 'tvshows') {
+        if (itemType === 'Channel' || viewType === 'books' || viewType === 'tvshows') {
             shape = getPortraitShape(enableOverflow);
         } else if (viewType === 'music' || viewType === 'homevideos') {
             shape = getSquareShape(enableOverflow);

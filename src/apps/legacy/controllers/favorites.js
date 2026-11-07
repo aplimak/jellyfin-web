@@ -24,7 +24,7 @@ function getSections() {
     return [{
         name: 'Movies',
         types: 'Movie',
-        shape: getPortraitShape(enableScrollX()),
+        shape: getBackdropShape(enableScrollX()),
         showTitle: true,
         showYear: true,
         overlayPlayButton: true,
@@ -33,7 +33,7 @@ function getSections() {
     }, {
         name: 'Shows',
         types: 'Series',
-        shape: getPortraitShape(enableScrollX()),
+        shape: getBackdropShape(enableScrollX()),
         showTitle: true,
         showYear: true,
         overlayPlayButton: true,
@@ -79,7 +79,7 @@ function getSections() {
     }, {
         name: 'Collections',
         types: 'BoxSet',
-        shape: getPortraitShape(enableScrollX()),
+        shape: getBackdropShape(enableScrollX()),
         showTitle: true,
         overlayPlayButton: true,
         overlayText: false,
