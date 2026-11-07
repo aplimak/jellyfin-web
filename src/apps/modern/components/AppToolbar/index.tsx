@@ -6,8 +6,6 @@ import { appRouter, PUBLIC_PATHS } from 'components/router/appRouter';
 import BaseToolbar from 'components/toolbar/AppToolbar';
 import ServerButton from 'components/toolbar/ServerButton';
 
-import RemotePlayButton from './RemotePlayButton';
-import SyncPlayButton from './SyncPlayButton';
 import SearchButton from './SearchButton';
 import UserViewNav from './userViews/UserViewNav';
 
@@ -36,11 +34,7 @@ const AppToolbar: FC<AppToolbarProps> = ({
     return (
         <BaseToolbar
             buttons={!isPublicPath && (
-                <>
-                    <SyncPlayButton />
-                    <RemotePlayButton />
-                    <SearchButton />
-                </>
+                <SearchButton />
             )}
             isDrawerAvailable={isDrawerAvailable}
             isDrawerOpen={isDrawerOpen}
