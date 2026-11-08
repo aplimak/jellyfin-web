@@ -989,7 +989,7 @@ function renderMiscInfo(page, item) {
             subtitles: false
         });
 
-        if (miscInfo.innerHTML && item.Type !== 'SeriesTimer') {
+        if (miscInfo.innerHTML && item.Type !== 'SeriesTimer' && item.Type !== 'BoxSet') {
             miscInfo.classList.remove('hide');
         } else {
             miscInfo.classList.add('hide');
@@ -1767,7 +1767,24 @@ function renderCollectionItemType(page, parentItem, type, items) {
     html += '<div class="sectionTitleContainer sectionTitleContainer-cards padded-left">';
     html += '<h2 class="sectionTitle sectionTitle-cards">';
     html += '<span>' + type.name + '</span>';
-    html += '</h2>';
+    if (type.type == 'Movie' && items && items.length > 0) {
+        html += '<span>: ' + items.length;
+        let collectionRuntime = 0;
+        let i = 0;
+        for (const item of items) {
+            collectionRuntime += item.RunTimeTicks;
+            if (i == 0 && item.UserData && item.UserData.PlaybackPositionTicks) {
+                collectionRuntime -= item.UserData.PlaybackPositionTicks;
+            }
+            i++;
+        }
+        if (collectionRuntime > 0) {
+            html += ` - ${datetime.getDisplayDuration(collectionRuntime)}`;
+        }
+        html += '</span>';
+    } else {
+        html += '</h2>';
+    }
     html += '</div>';
     html += '<div is="emby-itemscontainer" class="itemsContainer collectionItemsContainer vertical-wrap padded-left padded-right">';
     const shape = type.type == 'MusicAlbum' ? getSquareShape(false) : type.type == 'Movie' ? getBackdropShape(false) : getPortraitShape(false);
@@ -1775,7 +1792,8 @@ function renderCollectionItemType(page, parentItem, type, items) {
         items: items,
         shape: shape,
         showTitle: true,
-        showYear: type.mediaType === 'Video' || type.type === 'Series' || type.type === 'Movie',
+        showYear: type.type === 'Series',
+        showRuntime: type.mediaType === 'Video' || type.type === 'Movie',
         centerText: true,
         lazy: true,
         showDetailsMenu: true,
