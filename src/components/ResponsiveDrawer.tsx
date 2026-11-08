@@ -42,7 +42,7 @@ const ResponsiveDrawer: FC<PropsWithChildren<ResponsiveDrawerProps>> = ({
         </Drawer>
     ) : (
         /* MOBILE DRAWER */
-        <SwipeableDrawer
+        <Drawer
             anchor='left'
             open={open}
             sx={{
@@ -52,9 +52,6 @@ const ResponsiveDrawer: FC<PropsWithChildren<ResponsiveDrawerProps>> = ({
                 }
             }}
             onClose={onClose}
-            onOpen={onOpen}
-            // Disable swipe to open on iOS since it interferes with back navigation
-            disableDiscovery={browser.iOS}
             ModalProps={{
                 keepMounted: true // Better open performance on mobile.
             }}
@@ -67,7 +64,7 @@ const ResponsiveDrawer: FC<PropsWithChildren<ResponsiveDrawerProps>> = ({
             >
                 {children}
             </Box>
-        </SwipeableDrawer>
+        </Drawer>
     ));
 };
 
